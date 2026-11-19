@@ -8,6 +8,21 @@
 > *Course:* IT342 - Systems Integration and Architecture 1  
 > *Author:* John Lloyd Lourence C. Rabanal  
 > *Submission:* Project Development Increment 1 (User Accounts & Authentication Module)  
+> *Branch:* `main` (All features, documentation, and assets consolidated)
+
+---
+
+## Increment 1 Deliverables & Verification Checklist
+All core functional and architectural requirements for **Increment 1** are fully operational, tested, and integrated on the `main` branch:
+
+| Requirement / Deliverable | Status | Implementation Details |
+|---|---|---|
+| **1. User Account Creation** | ✅ Complete | Public customer registration with mobile number regex (`^(09\|\+639)\d{9}$`), duplicate prevention, and BCrypt work factor 10 password hashing. |
+| **2. User Login & Logout** | ✅ Complete | Stateless JJWT (HS512/HS256) authentication, authenticated session persistence via React Context, and clean logout / account switching. |
+| **3. Role-Based Dashboards** | ✅ Complete | Dedicated dashboards for **Store Owner** (management hub) and **Customer** (credit overview) with client-side route guards and backend `@PreAuthorize` security. |
+| **4. Database Integration** | ✅ Complete | PostgreSQL cloud instance hosted on Supabase connected via pooled connection with auto-table mapping. |
+| **5. Brand & UI Consistency** | ✅ Complete | Official TindahanKo logo branding and harmonized color palette integrated across navigation, forms, and headers. |
+| **6. Repository & Branch Integrity** | ✅ Complete | All project files, documentation, backend, and frontend fully merged on the `main` branch. |
 
 ---
 
