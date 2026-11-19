@@ -27,13 +27,9 @@ export function Unauthorized() {
         />
         <div style={{ fontSize: '36px', margin: '8px 0 12px' }}>🚫</div>
         <h2>403 - Access Denied</h2>
-        <p className="auth-subtitle">
+        <p className="auth-subtitle" style={{ marginBottom: '24px' }}>
           Your account role <code>{user?.role || 'GUEST'}</code> does not have permission to access this page.
         </p>
-
-        <div style={{ margin: '24px 0', padding: '16px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px', color: '#991B1B', fontSize: '14px' }}>
-          Role-Based Access Control (RBAC) is enforced by both the React route guard and the Spring Security backend.
-        </div>
 
         <button onClick={handleGoDashboard} className="btn btn-primary btn-block">
           Return to My Dashboard
