@@ -30,7 +30,6 @@ export function OwnerDashboard() {
       <main className="dashboard-content">
         <div className="dashboard-header">
           <div>
-            <span className="badge badge-owner">STORE OWNER DASHBOARD</span>
             <h1>Sari-Sari Store Management Hub</h1>
             <p className="dashboard-subtext">
               Welcome back, <strong>{user?.fullName}</strong> ({user?.username}) • Mobile: {user?.mobileNumber}

@@ -30,7 +30,6 @@ export function CustomerDashboard() {
       <main className="dashboard-content">
         <div className="dashboard-header">
           <div>
-            <span className="badge badge-customer">CUSTOMER BALANCE PORTAL</span>
             <h1>My Store Utang & Credit Overview</h1>
             <p className="dashboard-subtext">
               Welcome, <strong>{user?.fullName}</strong> ({user?.username}) • Registered Mobile: {user?.mobileNumber}
