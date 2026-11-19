@@ -84,10 +84,7 @@ export function OwnerDashboard() {
             </div>
 
             <div className="section-card">
-              <h3>Increment 1: Core Authentication & RBAC Verification</h3>
-              <p className="card-description">
-                You are securely authenticated as a <strong>Sari-Sari Store Owner</strong>. Spring Security and PostgreSQL enforce role-based access control, preventing customers or unauthenticated users from querying this endpoint.
-              </p>
+              <h3>Account & Profile Details</h3>
 
               <div className="info-table-wrapper">
                 <table className="info-table">

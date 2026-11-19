@@ -84,10 +84,7 @@ export function CustomerDashboard() {
             </div>
 
             <div className="section-card">
-              <h3>Increment 1: Customer Authentication & Access Verification</h3>
-              <p className="card-description">
-                You are securely logged in under the <strong>Store Customer (Borrower)</strong> role. Your session is protected by a stateless JWT token stored securely in your browser session.
-              </p>
+              <h3>Account & Profile Details</h3>
 
               <div className="info-table-wrapper">
                 <table className="info-table">
