@@ -38,8 +38,13 @@ export function Login() {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <img src="/logo.png" alt="TindahanKo Logo" className="auth-logo-img" />
-          <h2>Sign in to TindahanKo</h2>
+          <img
+            src="/logo.png"
+            alt="TindahanKo Logo"
+            className="auth-logo-img"
+            style={{ maxWidth: '210px', width: '100%', height: 'auto', maxHeight: '54px', objectFit: 'contain', margin: '0 auto 16px', display: 'block' }}
+          />
+          <h2>Sign In</h2>
           <p className="auth-subtitle">Sari-Sari Store Inventory & Credit Management</p>
         </div>
 

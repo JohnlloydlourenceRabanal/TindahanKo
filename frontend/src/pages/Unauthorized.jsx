@@ -19,7 +19,12 @@ export function Unauthorized() {
   return (
     <div className="auth-container">
       <div className="auth-card" style={{ textAlign: 'center' }}>
-        <img src="/logo.png" alt="TindahanKo Logo" className="auth-logo-img" />
+        <img
+          src="/logo.png"
+          alt="TindahanKo Logo"
+          className="auth-logo-img"
+          style={{ maxWidth: '210px', width: '100%', height: 'auto', maxHeight: '54px', objectFit: 'contain', margin: '0 auto 16px', display: 'block' }}
+        />
         <div style={{ fontSize: '36px', margin: '8px 0 12px' }}>🚫</div>
         <h2>403 - Access Denied</h2>
         <p className="auth-subtitle">

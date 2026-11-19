@@ -18,8 +18,12 @@ export function Navbar() {
       <div className="navbar-container">
         <div className="navbar-brand">
           <Link to={isOwner ? '/owner/dashboard' : '/customer/dashboard'} className="brand-logo">
-            <img src="/logo.png" alt="TindahanKo" className="navbar-logo-img" />
-            <span className="brand-title">TindahanKo</span>
+            <img
+              src="/logo.png"
+              alt="TindahanKo"
+              className="navbar-logo-img"
+              style={{ height: '32px', width: 'auto', maxHeight: '32px', objectFit: 'contain', display: 'block' }}
+            />
           </Link>
           <span className="brand-badge">
             {isOwner ? 'Store Owner' : 'Customer'}

@@ -92,7 +92,12 @@ export function Register() {
     <div className="auth-container">
       <div className="auth-card auth-card-wide">
         <div className="auth-header">
-          <img src="/logo.png" alt="TindahanKo Logo" className="auth-logo-img" />
+          <img
+            src="/logo.png"
+            alt="TindahanKo Logo"
+            className="auth-logo-img"
+            style={{ maxWidth: '210px', width: '100%', height: 'auto', maxHeight: '54px', objectFit: 'contain', margin: '0 auto 16px', display: 'block' }}
+          />
           <h2>Create Customer Account</h2>
           <p className="auth-subtitle">Register to monitor your utang balance, purchases, and payments</p>
         </div>

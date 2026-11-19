@@ -30,7 +30,12 @@ export function CustomerDashboard() {
       <main className="dashboard-content">
         <div className="dashboard-header">
           <div className="dashboard-header-brand">
-            <img src="/logo.png" alt="TindahanKo" className="dashboard-header-logo" />
+            <img
+              src="/logo.png"
+              alt="TindahanKo"
+              className="dashboard-header-logo"
+              style={{ height: '36px', width: 'auto', maxHeight: '36px', objectFit: 'contain', display: 'block' }}
+            />
             <div>
               <h1>My Store Utang & Credit Overview</h1>
               <p className="dashboard-subtext">
