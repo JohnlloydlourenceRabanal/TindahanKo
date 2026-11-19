@@ -1,5 +1,9 @@
 # TindahanKo
 
+<p align="center">
+  <img src="assets/tindahanko-logo.jpg" alt="TindahanKo Logo" width="420" style="border-radius: 8px;"/>
+</p>
+
 > **A Web-Based Inventory and Customer Credit Management System with SMS Reminders and Digital Payment Integration for Neighborhood Sari-Sari Stores**  
 > *Course:* IT342 - Systems Integration and Architecture 1  
 > *Author:* John Lloyd Lourence C. Rabanal  
