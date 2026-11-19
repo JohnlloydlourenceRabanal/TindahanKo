@@ -55,7 +55,6 @@ export function OwnerDashboard() {
                 <div className="stat-info">
                   <span className="stat-label">Product Inventory</span>
                   <span className="stat-value">Active Catalog</span>
-                  <span className="stat-meta">Ready for Increment 2 POS</span>
                 </div>
               </div>
 
@@ -64,7 +63,6 @@ export function OwnerDashboard() {
                 <div className="stat-info">
                   <span className="stat-label">Low Stock Alerts</span>
                   <span className="stat-value">0 Items</span>
-                  <span className="stat-meta">Automated threshold warnings</span>
                 </div>
               </div>
 
@@ -73,7 +71,6 @@ export function OwnerDashboard() {
                 <div className="stat-info">
                   <span className="stat-label">Total Utang Receivables</span>
                   <span className="stat-value">PHP 0.00</span>
-                  <span className="stat-meta">Digital customer ledger</span>
                 </div>
               </div>
 
@@ -82,7 +79,6 @@ export function OwnerDashboard() {
                 <div className="stat-info">
                   <span className="stat-label">Registered Debtors</span>
                   <span className="stat-value">1 Active</span>
-                  <span className="stat-meta">Credit limits monitored</span>
                 </div>
               </div>
             </div>

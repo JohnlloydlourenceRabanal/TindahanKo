@@ -29,13 +29,13 @@ export function Navbar() {
           {isOwner ? (
             <>
               <Link to="/owner/dashboard" className="nav-link active">Dashboard</Link>
-              <span className="nav-link disabled" title="Available in Increment 2">Inventory (Inc 2)</span>
-              <span className="nav-link disabled" title="Available in Increment 2">POS & Utang (Inc 2)</span>
+              <span className="nav-link disabled" title="Available in Increment 2">Inventory</span>
+              <span className="nav-link disabled" title="Available in Increment 2">POS & Utang</span>
             </>
           ) : (
             <>
               <Link to="/customer/dashboard" className="nav-link active">My Balance Portal</Link>
-              <span className="nav-link disabled" title="Available in Increment 3">Pay Online (Inc 3)</span>
+              <span className="nav-link disabled" title="Available in Increment 3">Pay Online</span>
             </>
           )}
         </nav>

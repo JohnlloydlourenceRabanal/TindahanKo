@@ -55,7 +55,6 @@ export function CustomerDashboard() {
                 <div className="stat-info">
                   <span className="stat-label">Outstanding Utang Balance</span>
                   <span className="stat-value text-accent">{dashboardData?.accountOverview?.currentUtangBalance || 'PHP 0.00'}</span>
-                  <span className="stat-meta">Status: {dashboardData?.accountOverview?.paymentStatus || 'Good Standing'}</span>
                 </div>
               </div>
 
@@ -64,7 +63,6 @@ export function CustomerDashboard() {
                 <div className="stat-info">
                   <span className="stat-label">Assigned Credit Limit</span>
                   <span className="stat-value">{dashboardData?.accountOverview?.creditLimit || 'PHP 2,000.00'}</span>
-                  <span className="stat-meta">Configured by Store Owner</span>
                 </div>
               </div>
 
@@ -72,8 +70,7 @@ export function CustomerDashboard() {
                 <div className="stat-icon">📅</div>
                 <div className="stat-info">
                   <span className="stat-label">Payment Due Date</span>
-                  <span className="stat-value">{dashboardData?.accountOverview?.dueDate || 'No Pending Due'}</span>
-                  <span className="stat-meta">SMS reminders via Semaphore</span>
+                  <span className="stat-value">{dashboardData?.accountOverview?.dueDate || 'No Active Due Date'}</span>
                 </div>
               </div>
 
@@ -82,7 +79,6 @@ export function CustomerDashboard() {
                 <div className="stat-info">
                   <span className="stat-label">SMS Alert Channel</span>
                   <span className="stat-value">Active</span>
-                  <span className="stat-meta">{user?.mobileNumber}</span>
                 </div>
               </div>
             </div>
