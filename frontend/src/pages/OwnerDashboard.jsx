@@ -36,10 +36,6 @@ export function OwnerDashboard() {
               Welcome back, <strong>{user?.fullName}</strong> ({user?.username}) • Mobile: {user?.mobileNumber}
             </p>
           </div>
-          <div className="status-pill status-online">
-            <span className="dot"></span>
-            <span>Authenticated via Supabase PostgreSQL</span>
-          </div>
         </div>
 
         {error && (

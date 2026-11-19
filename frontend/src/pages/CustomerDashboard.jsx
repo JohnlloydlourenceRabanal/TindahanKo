@@ -36,10 +36,6 @@ export function CustomerDashboard() {
               Welcome, <strong>{user?.fullName}</strong> ({user?.username}) • Registered Mobile: {user?.mobileNumber}
             </p>
           </div>
-          <div className="status-pill status-online">
-            <span className="dot"></span>
-            <span>Live Account (FR-017 / FR-018)</span>
-          </div>
         </div>
 
         {error && (
