@@ -104,10 +104,6 @@ export function CustomerDashboard() {
                       <td><strong>Registered Phone:</strong></td>
                       <td>{dashboardData?.mobileNumber || user?.mobileNumber}</td>
                     </tr>
-                    <tr>
-                      <td><strong>System Note:</strong></td>
-                      <td>{dashboardData?.message}</td>
-                    </tr>
                   </tbody>
                 </table>
               </div>

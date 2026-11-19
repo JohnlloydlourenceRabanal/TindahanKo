@@ -105,10 +105,6 @@ export function OwnerDashboard() {
                       <td>{dashboardData?.mobileNumber || user?.mobileNumber}</td>
                     </tr>
                     <tr>
-                      <td><strong>Backend Status:</strong></td>
-                      <td>{dashboardData?.message || 'Spring Boot REST API connected'}</td>
-                    </tr>
-                    <tr>
                       <td><strong>Server Verification Time:</strong></td>
                       <td>{dashboardData?.serverTime ? new Date(dashboardData.serverTime).toLocaleString() : 'Live'}</td>
                     </tr>

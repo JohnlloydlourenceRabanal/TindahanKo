@@ -45,7 +45,7 @@ public class DashboardController {
                 "totalReceivables", "PHP 0.00",
                 "activeDebtorsCount", 0
         ));
-        data.put("message", "Welcome back, Store Owner! Increment 1 Authentication and RBAC operational.");
+        data.put("message", "Operational");
 
         return ResponseEntity.ok(data);
     }
@@ -72,7 +72,7 @@ public class DashboardController {
                 "dueDate", "No active due date",
                 "paymentStatus", "Good Standing"
         ));
-        data.put("message", "Welcome to TindahanKo Customer Portal! Increment 1 Authentication and RBAC operational.");
+        data.put("message", "Operational");
 
         return ResponseEntity.ok(data);
     }
