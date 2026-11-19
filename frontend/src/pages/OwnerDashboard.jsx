@@ -32,7 +32,7 @@ export function OwnerDashboard() {
           <div>
             <h1>Sari-Sari Store Management Hub</h1>
             <p className="dashboard-subtext">
-              Welcome back, <strong>{user?.fullName}</strong> ({user?.username}) • Mobile: {user?.mobileNumber}
+              Welcome back, <strong>{user?.fullName}</strong> • Mobile: {user?.mobileNumber}
             </p>
           </div>
         </div>
@@ -111,21 +111,21 @@ export function OwnerDashboard() {
             </div>
 
             <div className="section-card">
-              <h3>Upcoming Store Operations (Increments 2 & 3)</h3>
+              <h3>Upcoming Store Operations</h3>
               <div className="action-buttons-grid">
-                <button className="action-btn disabled" title="Scheduled for Increment 2">
+                <button className="action-btn disabled">
                   <span className="action-btn-icon">🛒</span>
-                  <span>Point of Sale (POS) Cash Sale</span>
+                  <span>Point of Sale Cash Sale</span>
                 </button>
-                <button className="action-btn disabled" title="Scheduled for Increment 2">
+                <button className="action-btn disabled">
                   <span className="action-btn-icon">📝</span>
-                  <span>Record Utang (Credit) Charge</span>
+                  <span>Record Utang Charge</span>
                 </button>
-                <button className="action-btn disabled" title="Scheduled for Increment 3">
+                <button className="action-btn disabled">
                   <span className="action-btn-icon">📱</span>
                   <span>Dispatch Semaphore SMS Reminders</span>
                 </button>
-                <button className="action-btn disabled" title="Scheduled for Increment 3">
+                <button className="action-btn disabled">
                   <span className="action-btn-icon">💳</span>
                   <span>PayMongo Digital Reconciliation</span>
                 </button>

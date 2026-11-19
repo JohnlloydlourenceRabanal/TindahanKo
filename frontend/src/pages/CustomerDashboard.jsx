@@ -32,7 +32,7 @@ export function CustomerDashboard() {
           <div>
             <h1>My Store Utang & Credit Overview</h1>
             <p className="dashboard-subtext">
-              Welcome, <strong>{user?.fullName}</strong> ({user?.username}) • Registered Mobile: {user?.mobileNumber}
+              Welcome, <strong>{user?.fullName}</strong> • Registered Mobile: {user?.mobileNumber}
             </p>
           </div>
         </div>
@@ -107,18 +107,15 @@ export function CustomerDashboard() {
             </div>
 
             <div className="section-card">
-              <h3>Online Utang Settlement (Increment 3 Feature)</h3>
-              <p className="card-description">
-                Customers will be able to settle their utang balance cashless using Philippine e-wallets via PayMongo.
-              </p>
+              <h3>Online Utang Settlement</h3>
               <div className="action-buttons-grid">
-                <button className="action-btn disabled" title="Integrated in Increment 3 via PayMongo">
+                <button className="action-btn disabled">
                   <span className="action-btn-icon">💙</span>
-                  <span>Pay via GCash (Upcoming)</span>
+                  <span>Pay via GCash</span>
                 </button>
-                <button className="action-btn disabled" title="Integrated in Increment 3 via PayMongo">
+                <button className="action-btn disabled">
                   <span className="action-btn-icon">💚</span>
-                  <span>Pay via Maya (Upcoming)</span>
+                  <span>Pay via Maya</span>
                 </button>
               </div>
             </div>

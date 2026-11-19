@@ -21,7 +21,7 @@ export function Navbar() {
             🏪 TindahanKo
           </Link>
           <span className="brand-badge">
-            {isOwner ? 'Store Owner (Admin)' : 'Customer (Borrower)'}
+            {isOwner ? 'Store Owner' : 'Customer'}
           </span>
         </div>
 
