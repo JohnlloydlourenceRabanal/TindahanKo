@@ -1,0 +1,35 @@
+# Environment Variables and Secrets (STRICTLY IGNORED)
+.env
+.env.local
+.env.*.local
+*.env
+
+# Operating System and Office temp files
+.DS_Store
+Thumbs.db
+*.tmp
+~$*
+~*
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.iml
+*.sublime-project
+*.sublime-workspace
+
+# Backend / Maven
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+backend/logs/
+*.log
+
+# Frontend / Node
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/*.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
