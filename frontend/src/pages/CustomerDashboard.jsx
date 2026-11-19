@@ -29,11 +29,14 @@ export function CustomerDashboard() {
 
       <main className="dashboard-content">
         <div className="dashboard-header">
-          <div>
-            <h1>My Store Utang & Credit Overview</h1>
-            <p className="dashboard-subtext">
-              Welcome, <strong>{user?.fullName}</strong> • Registered Mobile: {user?.mobileNumber}
-            </p>
+          <div className="dashboard-header-brand">
+            <img src="/logo.png" alt="TindahanKo" className="dashboard-header-logo" />
+            <div>
+              <h1>My Store Utang & Credit Overview</h1>
+              <p className="dashboard-subtext">
+                Welcome, <strong>{user?.fullName}</strong> • Registered Mobile: {user?.mobileNumber}
+              </p>
+            </div>
           </div>
         </div>
 

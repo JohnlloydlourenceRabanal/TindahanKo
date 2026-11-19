@@ -29,11 +29,14 @@ export function OwnerDashboard() {
 
       <main className="dashboard-content">
         <div className="dashboard-header">
-          <div>
-            <h1>Sari-Sari Store Management Hub</h1>
-            <p className="dashboard-subtext">
-              Welcome back, <strong>{user?.fullName}</strong> • Mobile: {user?.mobileNumber}
-            </p>
+          <div className="dashboard-header-brand">
+            <img src="/logo.png" alt="TindahanKo" className="dashboard-header-logo" />
+            <div>
+              <h1>Sari-Sari Store Management Hub</h1>
+              <p className="dashboard-subtext">
+                Welcome back, <strong>{user?.fullName}</strong> • Mobile: {user?.mobileNumber}
+              </p>
+            </div>
           </div>
         </div>
 

@@ -19,7 +19,8 @@ export function Unauthorized() {
   return (
     <div className="auth-container">
       <div className="auth-card" style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: '48px', marginBottom: '16px' }}>🚫</div>
+        <img src="/logo.png" alt="TindahanKo Logo" className="auth-logo-img" />
+        <div style={{ fontSize: '36px', margin: '8px 0 12px' }}>🚫</div>
         <h2>403 - Access Denied</h2>
         <p className="auth-subtitle">
           Your account role <code>{user?.role || 'GUEST'}</code> does not have permission to access this page.

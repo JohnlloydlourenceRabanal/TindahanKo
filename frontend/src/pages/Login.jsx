@@ -38,7 +38,7 @@ export function Login() {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <div className="logo-icon">🏪</div>
+          <img src="/logo.png" alt="TindahanKo Logo" className="auth-logo-img" />
           <h2>Sign in to TindahanKo</h2>
           <p className="auth-subtitle">Sari-Sari Store Inventory & Credit Management</p>
         </div>
