@@ -4,12 +4,12 @@ import { useAuth } from '../context/AuthContext';
 
 export function Register() {
   const [formData, setFormData] = useState({
-    username: '',
     fullName: '',
+    username: '',
     mobileNumber: '',
     password: '',
     confirmPassword: '',
-    role: 'CUSTOMER',
+    role: 'CUSTOMER', // Defaulted securely to CUSTOMER role
   });
 
   const [fieldErrors, setFieldErrors] = useState({});
@@ -22,7 +22,7 @@ export function Register() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear field-specific error as user types
+    // Clear field error as user types
     if (fieldErrors[name]) {
       setFieldErrors((prev) => ({ ...prev, [name]: null }));
     }
@@ -30,21 +30,21 @@ export function Register() {
 
   const validate = () => {
     const errors = {};
+    if (!formData.fullName.trim()) {
+      errors.fullName = 'Full name is required';
+    }
+
     if (!formData.username.trim()) {
       errors.username = 'Username is required';
     } else if (formData.username.trim().length < 3) {
       errors.username = 'Username must be at least 3 characters';
     }
 
-    if (!formData.fullName.trim()) {
-      errors.fullName = 'Full name is required';
-    }
-
     const phonePattern = /^(09|\+639)\d{9}$/;
     if (!formData.mobileNumber.trim()) {
       errors.mobileNumber = 'Philippine mobile number is required';
     } else if (!phonePattern.test(formData.mobileNumber.trim())) {
-      errors.mobileNumber = 'Must be a valid 11-digit Philippine mobile number (e.g. 09171234567)';
+      errors.mobileNumber = 'Must be a valid 11-digit Philippine number (e.g. 09171234567)';
     }
 
     if (!formData.password) {
@@ -71,10 +71,13 @@ export function Register() {
 
     setSubmitting(true);
     try {
-      const user = await register(formData);
-      // Redirect based on role
-      const redirectPath = user.role === 'STORE_OWNER' ? '/owner/dashboard' : '/customer/dashboard';
-      navigate(redirectPath, { replace: true });
+      // Force role to CUSTOMER for public self-registration
+      const registrationPayload = {
+        ...formData,
+        role: 'CUSTOMER',
+      };
+      const user = await register(registrationPayload);
+      navigate('/customer/dashboard', { replace: true });
     } catch (err) {
       if (err.data?.fieldErrors) {
         setFieldErrors(err.data.fieldErrors);
@@ -90,8 +93,8 @@ export function Register() {
       <div className="auth-card auth-card-wide">
         <div className="auth-header">
           <div className="logo-icon">🏪</div>
-          <h2>Create TindahanKo Account</h2>
-          <p className="auth-subtitle">Register to manage your store or monitor your credit ledger</p>
+          <h2>Create Customer Account</h2>
+          <p className="auth-subtitle">Register to monitor your utang balance, purchases, and payments</p>
         </div>
 
         {generalError && (
@@ -134,36 +137,19 @@ export function Register() {
             </div>
           </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="mobileNumber">Philippine Mobile Number</label>
-              <input
-                id="mobileNumber"
-                name="mobileNumber"
-                type="tel"
-                value={formData.mobileNumber}
-                onChange={handleChange}
-                placeholder="09XXXXXXXXX"
-                disabled={submitting}
-                className={fieldErrors.mobileNumber ? 'input-error' : ''}
-              />
-              {fieldErrors.mobileNumber && <span className="field-error">{fieldErrors.mobileNumber}</span>}
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="role">Account Role</label>
-              <select
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                disabled={submitting}
-                className="select-input"
-              >
-                <option value="CUSTOMER">Store Customer (Borrower)</option>
-                <option value="STORE_OWNER">Sari-Sari Store Owner (Admin)</option>
-              </select>
-            </div>
+          <div className="form-group">
+            <label htmlFor="mobileNumber">Philippine Mobile Number</label>
+            <input
+              id="mobileNumber"
+              name="mobileNumber"
+              type="tel"
+              value={formData.mobileNumber}
+              onChange={handleChange}
+              placeholder="09XXXXXXXXX"
+              disabled={submitting}
+              className={fieldErrors.mobileNumber ? 'input-error' : ''}
+            />
+            {fieldErrors.mobileNumber && <span className="field-error">{fieldErrors.mobileNumber}</span>}
           </div>
 
           <div className="form-row">
