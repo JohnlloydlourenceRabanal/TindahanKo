@@ -25,6 +25,9 @@ public class RegisterRequest {
     @Pattern(regexp = "^(09\\d{9}|\\+639\\d{9})$", message = "Mobile number must be a valid Philippine number (e.g. 09171234567 or +639171234567)")
     private String mobileNumber;
 
+    @jakarta.validation.constraints.Email(message = "Please provide a valid email address")
+    private String email;
+
     // Optional on registration; defaults to CUSTOMER if not provided or valid
     private String role;
 
@@ -68,6 +71,14 @@ public class RegisterRequest {
 
     public void setMobileNumber(String mobileNumber) {
         this.mobileNumber = mobileNumber;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getRole() {

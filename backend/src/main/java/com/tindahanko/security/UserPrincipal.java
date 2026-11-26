@@ -15,6 +15,7 @@ public class UserPrincipal implements UserDetails {
     private final String password;
     private final String fullName;
     private final String mobileNumber;
+    private final String email;
     private final GrantedAuthority authority;
 
     public UserPrincipal(User user) {
@@ -23,6 +24,7 @@ public class UserPrincipal implements UserDetails {
         this.password = user.getPasswordHash();
         this.fullName = user.getFullName();
         this.mobileNumber = user.getMobileNumber();
+        this.email = user.getEmail();
         this.authority = new SimpleGrantedAuthority("ROLE_" + user.getRole().name());
     }
 
@@ -36,6 +38,10 @@ public class UserPrincipal implements UserDetails {
 
     public String getMobileNumber() {
         return mobileNumber;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     public String getRoleName() {

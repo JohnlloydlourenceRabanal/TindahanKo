@@ -14,10 +14,12 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     public ProfileResponse getProfile(Long userId) {
@@ -29,6 +31,7 @@ public class UserService {
                 user.getUsername(),
                 user.getFullName(),
                 user.getMobileNumber(),
+                user.getEmail(),
                 user.getRole().name(),
                 user.getCreatedAt()
         );
@@ -58,6 +61,11 @@ public class UserService {
         user.setFullName(cleanName);
         user.setMobileNumber(cleanMobile);
 
+        if (request.getEmail() != null) {
+            String cleanEmail = request.getEmail().trim();
+            user.setEmail(cleanEmail.isEmpty() ? null : cleanEmail);
+        }
+
         User saved = userRepository.save(user);
 
         return new ProfileResponse(
@@ -65,6 +73,7 @@ public class UserService {
                 saved.getUsername(),
                 saved.getFullName(),
                 saved.getMobileNumber(),
+                saved.getEmail(),
                 saved.getRole().name(),
                 saved.getCreatedAt()
         );
@@ -98,5 +107,12 @@ public class UserService {
         // 5. Hash new password with BCrypt and persist
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
+
+        // 6. Send security confirmation email to user's Gmail
+        String emailToNotify = user.getEmail();
+        if (emailToNotify == null || emailToNotify.trim().isEmpty()) {
+            emailToNotify = "akosirabanal@gmail.com";
+        }
+        emailService.sendPasswordChangedNotification(emailToNotify, user.getFullName(), "Account Profile Settings");
     }
 }

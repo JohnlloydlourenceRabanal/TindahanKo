@@ -14,11 +14,20 @@ public class ProfileUpdateRequest {
     @Pattern(regexp = "^(09|\\+639)\\d{9}$", message = "Mobile number must be a valid 11-digit Philippine number (e.g., 09171234567)")
     private String mobileNumber;
 
+    @jakarta.validation.constraints.Email(message = "Please provide a valid email address")
+    private String email;
+
     public ProfileUpdateRequest() {}
 
     public ProfileUpdateRequest(String fullName, String mobileNumber) {
         this.fullName = fullName;
         this.mobileNumber = mobileNumber;
+    }
+
+    public ProfileUpdateRequest(String fullName, String mobileNumber, String email) {
+        this.fullName = fullName;
+        this.mobileNumber = mobileNumber;
+        this.email = email;
     }
 
     public String getFullName() {
@@ -35,5 +44,13 @@ public class ProfileUpdateRequest {
 
     public void setMobileNumber(String mobileNumber) {
         this.mobileNumber = mobileNumber;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

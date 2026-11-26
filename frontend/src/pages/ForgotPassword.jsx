@@ -8,8 +8,12 @@ export function ForgotPassword() {
   // Step 1: Identity Verification | Step 2: Enter Code & Reset Password | Step 3: Success
   const [step, setStep] = useState(1);
 
+  // Recovery Method: 'email' (Gmail) | 'mobile' (SMS)
+  const [method, setMethod] = useState('email');
+
   // Identity Verification Form Fields
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
   const [fullName, setFullName] = useState('');
 
@@ -28,27 +32,47 @@ export function ForgotPassword() {
     e.preventDefault();
     setError('');
 
-    if (!username.trim() || !mobileNumber.trim() || !fullName.trim()) {
-      setError('Please provide your Username, Registered Mobile Number, and Full Name for identity verification.');
+    if (!username.trim() || !fullName.trim()) {
+      setError('Please provide your Username and Registered Full Name for identity verification.');
       return;
     }
 
-    const cleanMobile = mobileNumber.trim().replace(/[\s\-()]/g, '');
-    const mobileRegex = /^(09|\+639)\d{9}$/;
-    if (!mobileRegex.test(cleanMobile)) {
-      setError('Mobile number must be a valid Philippine mobile number (e.g., 09171234567 or +639171234567).');
-      return;
+    const payload = {
+      username: username.trim(),
+      fullName: fullName.trim(),
+      method,
+    };
+
+    if (method === 'email') {
+      if (!email.trim()) {
+        setError('Please provide your registered Email Address.');
+        return;
+      }
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(email.trim())) {
+        setError('Please enter a valid email address (e.g. akosirabanal@gmail.com).');
+        return;
+      }
+      payload.email = email.trim();
+    } else {
+      if (!mobileNumber.trim()) {
+        setError('Please provide your registered Philippine mobile number.');
+        return;
+      }
+      const cleanMobile = mobileNumber.trim().replace(/[\s\-()]/g, '');
+      const mobileRegex = /^(09|\+639)\d{9}$/;
+      if (!mobileRegex.test(cleanMobile)) {
+        setError('Mobile number must be a valid Philippine mobile number (e.g., 09171234567 or +639171234567).');
+        return;
+      }
+      payload.mobileNumber = cleanMobile;
     }
 
     setLoading(true);
     try {
-      const res = await authApi.forgotPassword({
-        username: username.trim(),
-        mobileNumber: cleanMobile,
-        fullName: fullName.trim(),
-      });
+      const res = await authApi.forgotPassword(payload);
       setSuccessInfo(res);
-      setToken(''); // Never prefill token; must be provided from received SMS/console
+      setToken(''); // Never prefill token; must be provided from received SMS/email
       setStep(2);
     } catch (err) {
       setError(err.message || 'Identity verification failed. Please verify your account details.');
@@ -103,8 +127,8 @@ export function ForgotPassword() {
           />
           <h2>{step === 3 ? 'Password Reset Complete' : 'Reset Your Password'}</h2>
           <p className="auth-subtitle">
-            {step === 1 && 'Verify your account credentials to receive a secure recovery code via SMS'}
-            {step === 2 && 'Enter the verification code dispatched to your phone to set a new password'}
+            {step === 1 && (method === 'email' ? 'Verify your identity to receive a secure recovery code via Gmail' : 'Verify your identity to receive a secure recovery code via SMS')}
+            {step === 2 && 'Enter the verification code dispatched to your device to set a new password'}
             {step === 3 && 'Your account credentials have been securely updated with BCrypt hashing'}
           </p>
         </div>
@@ -119,6 +143,23 @@ export function ForgotPassword() {
         {/* STEP 1: Secure Multi-Factor Identity Verification */}
         {step === 1 && (
           <form onSubmit={handleRequestToken} className="auth-form">
+            <div className="recovery-toggle-group">
+              <button
+                type="button"
+                className={`recovery-toggle-btn ${method === 'email' ? 'active' : ''}`}
+                onClick={() => { setMethod('email'); setError(''); }}
+              >
+                ✉️ Via Email (Gmail)
+              </button>
+              <button
+                type="button"
+                className={`recovery-toggle-btn ${method === 'mobile' ? 'active' : ''}`}
+                onClick={() => { setMethod('mobile'); setError(''); }}
+              >
+                📱 Via Mobile Number (SMS)
+              </button>
+            </div>
+
             <div className="form-group">
               <label htmlFor="username">Account Username *</label>
               <input
@@ -132,17 +173,33 @@ export function ForgotPassword() {
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="mobileNumber">Registered Philippine Mobile Number *</label>
-              <input
-                id="mobileNumber"
-                type="tel"
-                value={mobileNumber}
-                onChange={(e) => setMobileNumber(e.target.value)}
-                placeholder="09171234567 or +639171234567"
-                required
-              />
-            </div>
+            {method === 'email' ? (
+              <div className="form-group">
+                <label htmlFor="email">Registered Email Address *</label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="e.g. akosirabanal@gmail.com"
+                  required
+                />
+                <span className="field-hint">A single-use verification code will be sent to this Gmail address.</span>
+              </div>
+            ) : (
+              <div className="form-group">
+                <label htmlFor="mobileNumber">Registered Philippine Mobile Number *</label>
+                <input
+                  id="mobileNumber"
+                  type="tel"
+                  value={mobileNumber}
+                  onChange={(e) => setMobileNumber(e.target.value)}
+                  placeholder="09171234567 or +639171234567"
+                  required
+                />
+                <span className="field-hint">A single-use verification code will be sent via SMS to this number.</span>
+              </div>
+            )}
 
             <div className="form-group">
               <label htmlFor="fullName">Registered Full Name *</label>
@@ -179,19 +236,18 @@ export function ForgotPassword() {
               <span className="alert-icon">🔔</span>
               <div>
                 <strong>Identity Verified!</strong>
-                <div style={{ marginTop: '2px', fontSize: '0.9rem' }}>
-                  {successInfo?.liveEmailSent && (
-                    <div style={{ color: '#047857', fontWeight: '500' }}>
-                      ✉️ Verification email sent to your Gmail (<strong>{successInfo.maskedEmail}</strong>). Please check your inbox or spam!
-                    </div>
-                  )}
-                  {successInfo?.liveSmsSent ? (
-                    <div style={{ marginTop: '3px' }}>
-                      📱 Real SMS dispatched via <strong>Semaphore API</strong> to <strong>{successInfo?.maskedMobile}</strong>.
+                <div style={{ marginTop: '4px', fontSize: '0.9rem' }}>
+                  {method === 'email' ? (
+                    <div>
+                      ✉️ Verification code sent to your Gmail (<strong>{successInfo?.maskedEmail}</strong>). Please check your inbox or spam!
                     </div>
                   ) : (
-                    <div style={{ marginTop: '3px' }}>
-                      📱 Dispatched to phone <strong>{successInfo?.maskedMobile}</strong> and Gmail <strong>{successInfo?.maskedEmail}</strong>.
+                    <div>
+                      {successInfo?.liveSmsSent ? (
+                        <span>📱 Real SMS dispatched via Semaphore to <strong>{successInfo?.maskedMobile}</strong>.</span>
+                      ) : (
+                        <span>📱 Verification code dispatched via SMS to <strong>{successInfo?.maskedMobile}</strong>.</span>
+                      )}
                     </div>
                   )}
                 </div>
@@ -212,7 +268,11 @@ export function ForgotPassword() {
                 required
                 autoFocus
               />
-              <span className="field-hint">Enter the code received on your registered mobile device.</span>
+              <span className="field-hint">
+                {method === 'email'
+                  ? `Enter the 8-character code received at ${successInfo?.maskedEmail || 'your Gmail address'}.`
+                  : `Enter the 8-character code received via SMS on ${successInfo?.maskedMobile || 'your mobile phone'}.`}
+              </span>
             </div>
 
             <div className="form-group">

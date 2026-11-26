@@ -6,6 +6,7 @@ export function Register() {
   const [formData, setFormData] = useState({
     fullName: '',
     username: '',
+    email: '',
     mobileNumber: '',
     password: '',
     confirmPassword: '',
@@ -38,6 +39,11 @@ export function Register() {
       errors.username = 'Username is required';
     } else if (formData.username.trim().length < 3) {
       errors.username = 'Username must be at least 3 characters';
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (formData.email && !emailPattern.test(formData.email.trim())) {
+      errors.email = 'Please enter a valid email address';
     }
 
     const phonePattern = /^(09|\+639)\d{9}$/;
@@ -140,6 +146,21 @@ export function Register() {
               />
               {fieldErrors.username && <span className="field-error">{fieldErrors.username}</span>}
             </div>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="email">Email Address (Optional / Recommended for Gmail alerts)</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="e.g. yourname@gmail.com"
+              disabled={submitting}
+              className={fieldErrors.email ? 'input-error' : ''}
+            />
+            {fieldErrors.email && <span className="field-error">{fieldErrors.email}</span>}
           </div>
 
           <div className="form-group">

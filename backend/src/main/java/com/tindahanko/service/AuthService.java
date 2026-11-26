@@ -82,11 +82,16 @@ public class AuthService {
         // Securely hash password with BCrypt
         String passwordHash = passwordEncoder.encode(request.getPassword());
 
+        String cleanEmail = request.getEmail() != null && !request.getEmail().trim().isEmpty()
+                ? request.getEmail().trim()
+                : null;
+
         User newUser = new User(
                 request.getUsername().trim(),
                 passwordHash,
                 request.getFullName().trim(),
                 cleanMobile,
+                cleanEmail,
                 assignedRole
         );
 
@@ -105,6 +110,7 @@ public class AuthService {
                 savedUser.getUsername(),
                 savedUser.getFullName(),
                 savedUser.getMobileNumber(),
+                savedUser.getEmail(),
                 savedUser.getRole().name(),
                 "Registration successful"
         );
@@ -131,6 +137,7 @@ public class AuthService {
                     principal.getUsername(),
                     principal.getFullName(),
                     principal.getMobileNumber(),
+                    principal.getEmail(),
                     principal.getRoleName(),
                     "Login successful"
             );
@@ -148,6 +155,7 @@ public class AuthService {
                 user.getUsername(),
                 user.getFullName(),
                 user.getMobileNumber(),
+                user.getEmail(),
                 user.getRole().name()
         );
     }
@@ -155,22 +163,46 @@ public class AuthService {
     @Transactional
     public ForgotPasswordResponse requestPasswordReset(ForgotPasswordRequest request) {
         String username = request.getUsername().trim();
-        String mobileNumber = request.getMobileNumber().trim().replaceAll("[\\s\\-\\(\\)]", "");
         String fullName = request.getFullName().trim();
+        String method = request.getMethod() != null ? request.getMethod().trim().toLowerCase() : "";
+        String mobileNumber = request.getMobileNumber() != null ? request.getMobileNumber().trim().replaceAll("[\\s\\-\\(\\)]", "") : "";
+        String email = request.getEmail() != null ? request.getEmail().trim().toLowerCase() : "";
 
-        // Strict multi-factor identity verification: username, mobile number, and full name must all match
+        // Verify user exists by username
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("Identity verification failed: The provided username, mobile number, and full name do not match our records."));
-
-        // Verify registered mobile number
-        String userMobile = user.getMobileNumber().replaceAll("[\\s\\-\\(\\)]", "");
-        if (!userMobile.equals(mobileNumber)) {
-            throw new IllegalArgumentException("Identity verification failed: The provided username, mobile number, and full name do not match our records.");
-        }
+                .orElseThrow(() -> new IllegalArgumentException("Identity verification failed: The provided username does not match our records."));
 
         // Verify registered full name (case-insensitive)
         if (!user.getFullName().trim().equalsIgnoreCase(fullName)) {
-            throw new IllegalArgumentException("Identity verification failed: The provided username, mobile number, and full name do not match our records.");
+            throw new IllegalArgumentException("Identity verification failed: The provided full name does not match our records.");
+        }
+
+        boolean verifyByEmail = "email".equals(method) || (!email.isEmpty() && mobileNumber.isEmpty());
+        boolean verifyByMobile = "mobile".equals(method) || (!mobileNumber.isEmpty() && email.isEmpty());
+
+        if (!verifyByEmail && !verifyByMobile) {
+            verifyByEmail = !email.isEmpty();
+            verifyByMobile = !mobileNumber.isEmpty();
+        }
+
+        if (!verifyByEmail && !verifyByMobile) {
+            throw new IllegalArgumentException("Please provide your registered Email Address or Philippine Mobile Number for verification.");
+        }
+
+        if (verifyByEmail) {
+            if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+                throw new IllegalArgumentException("No registered email address found for account '" + username + "'. Please choose 'Via Mobile Number' instead.");
+            }
+            if (!user.getEmail().trim().equalsIgnoreCase(email)) {
+                throw new IllegalArgumentException("Identity verification failed: The provided email address does not match our records for this account.");
+            }
+        }
+
+        if (verifyByMobile) {
+            String userMobile = user.getMobileNumber().replaceAll("[\\s\\-\\(\\)]", "");
+            if (!userMobile.equals(mobileNumber)) {
+                throw new IllegalArgumentException("Identity verification failed: The provided mobile number does not match our records for this account.");
+            }
         }
 
         // Invalidate any existing unused reset tokens for this user
@@ -186,9 +218,9 @@ public class AuthService {
 
         // Mask phone number for user privacy and security (e.g., 0917****888)
         String rawPhone = user.getMobileNumber();
-        String maskedMobile = rawPhone.length() >= 7
+        String maskedMobile = rawPhone != null && rawPhone.length() >= 7
                 ? rawPhone.substring(0, 4) + "****" + rawPhone.substring(rawPhone.length() - 3)
-                : rawPhone;
+                : (rawPhone != null ? rawPhone : "N/A");
 
         // Mask email for user privacy (e.g., a***l@gmail.com)
         String userEmail = user.getEmail();
@@ -201,21 +233,33 @@ public class AuthService {
             maskedEmail = userEmail.charAt(0) + "***" + userEmail.charAt(atIdx - 1) + userEmail.substring(atIdx);
         }
 
-        // 1. Dispatch SMS via Semaphore API (sends real text message if approved/credited)
-        boolean liveSmsSent = semaphoreService.sendVerificationSms(user.getMobileNumber(), user.getFullName(), token, expiryMinutes);
+        // 1. Dispatch SMS via Semaphore API ONLY if verifying by mobile
+        boolean liveSmsSent = false;
+        if (verifyByMobile && !"email".equals(method)) {
+            liveSmsSent = semaphoreService.sendVerificationSms(user.getMobileNumber(), user.getFullName(), token, expiryMinutes);
+        }
 
-        // 2. Dispatch Email via Gmail SMTP / Resend API (sends real email to Gmail inbox if configured)
-        boolean liveEmailSent = emailService.sendVerificationEmail(userEmail, user.getFullName(), token, expiryMinutes);
+        // 2. Dispatch Email via Gmail SMTP / Resend API ONLY if verifying by email
+        boolean liveEmailSent = false;
+        if (verifyByEmail && !"mobile".equals(method)) {
+            liveEmailSent = emailService.sendVerificationEmail(userEmail, user.getFullName(), token, expiryMinutes);
+        }
 
         StringBuilder sb = new StringBuilder("Identity verified! ");
-        if (liveSmsSent && liveEmailSent) {
-            sb.append("A verification code was dispatched via Semaphore SMS and to your Gmail (").append(maskedEmail).append(").");
-        } else if (liveEmailSent) {
+        if ("email".equals(method) || (verifyByEmail && !verifyByMobile)) {
+            maskedMobile = null; // Strictly do not include mobile info when verifying by email
             sb.append("A verification code was sent to your Gmail (").append(maskedEmail).append("). Please check your inbox.");
-        } else if (liveSmsSent) {
-            sb.append("A verification code was sent to your phone via Semaphore SMS (").append(maskedMobile).append(").");
+        } else if ("mobile".equals(method) || (verifyByMobile && !verifyByEmail)) {
+            maskedEmail = null; // Strictly do not include email info when verifying by mobile
+            sb.append("A verification code was sent to your phone via SMS (").append(maskedMobile).append(").");
         } else {
-            sb.append("A verification code was dispatched to your phone (").append(maskedMobile).append(") and Gmail (").append(maskedEmail).append(").");
+            if (liveEmailSent) {
+                sb.append("A verification code was sent to your Gmail (").append(maskedEmail).append(").");
+            } else if (liveSmsSent) {
+                sb.append("A verification code was sent to your phone (").append(maskedMobile).append(").");
+            } else {
+                sb.append("A verification code was dispatched to your account.");
+            }
         }
 
         // The HTTP response intentionally NEVER leaks the token to the client browser
@@ -269,5 +313,12 @@ public class AuthService {
         // Mark token as consumed (single-use enforcement)
         resetToken.setUsed(true);
         passwordResetTokenRepository.save(resetToken);
+
+        // Dispatch security notification email to user's Gmail
+        String emailToNotify = user.getEmail();
+        if (emailToNotify == null || emailToNotify.trim().isEmpty()) {
+            emailToNotify = "akosirabanal@gmail.com";
+        }
+        emailService.sendPasswordChangedNotification(emailToNotify, user.getFullName(), "Forgot Password Recovery");
     }
 }

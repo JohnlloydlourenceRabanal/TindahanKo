@@ -1,19 +1,22 @@
 package com.tindahanko.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 
 public class ForgotPasswordRequest {
 
     @NotBlank(message = "Username is required for identity verification")
     private String username;
 
-    @NotBlank(message = "Registered Philippine mobile number is required")
-    @Pattern(regexp = "^(09|\\+639)\\d{9}$", message = "Mobile number must be a valid Philippine number (e.g., 09171234567 or +639171234567)")
-    private String mobileNumber;
-
     @NotBlank(message = "Registered full name is required for identity verification")
     private String fullName;
+
+    // Optional: At least one of mobileNumber or email must be provided
+    private String mobileNumber;
+
+    private String email;
+
+    // Optional: "email" or "mobile"
+    private String method;
 
     public ForgotPasswordRequest() {}
 
@@ -21,6 +24,14 @@ public class ForgotPasswordRequest {
         this.username = username;
         this.mobileNumber = mobileNumber;
         this.fullName = fullName;
+    }
+
+    public ForgotPasswordRequest(String username, String mobileNumber, String email, String fullName, String method) {
+        this.username = username;
+        this.mobileNumber = mobileNumber;
+        this.email = email;
+        this.fullName = fullName;
+        this.method = method;
     }
 
     public String getUsername() {
@@ -31,6 +42,14 @@ public class ForgotPasswordRequest {
         this.username = username;
     }
 
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
     public String getMobileNumber() {
         return mobileNumber;
     }
@@ -39,11 +58,19 @@ public class ForgotPasswordRequest {
         this.mobileNumber = mobileNumber;
     }
 
-    public String getFullName() {
-        return fullName;
+    public String getEmail() {
+        return email;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
     }
 }

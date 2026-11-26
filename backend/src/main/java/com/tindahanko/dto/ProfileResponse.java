@@ -7,16 +7,22 @@ public class ProfileResponse {
     private String username;
     private String fullName;
     private String mobileNumber;
+    private String email;
     private String role;
     private LocalDateTime createdAt;
 
     public ProfileResponse() {}
 
     public ProfileResponse(Long userId, String username, String fullName, String mobileNumber, String role, LocalDateTime createdAt) {
+        this(userId, username, fullName, mobileNumber, null, role, createdAt);
+    }
+
+    public ProfileResponse(Long userId, String username, String fullName, String mobileNumber, String email, String role, LocalDateTime createdAt) {
         this.userId = userId;
         this.username = username;
         this.fullName = fullName;
         this.mobileNumber = mobileNumber;
+        this.email = email;
         this.role = role;
         this.createdAt = createdAt;
     }
@@ -51,6 +57,14 @@ public class ProfileResponse {
 
     public void setMobileNumber(String mobileNumber) {
         this.mobileNumber = mobileNumber;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getRole() {

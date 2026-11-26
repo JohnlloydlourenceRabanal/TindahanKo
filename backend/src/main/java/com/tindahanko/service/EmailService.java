@@ -106,6 +106,97 @@ public class EmailService {
         return false;
     }
 
+    /**
+     * Sends password change security confirmation email to user's Gmail.
+     */
+    public boolean sendPasswordChangedNotification(String toEmail, String recipientName, String changeMethod) {
+        if (toEmail == null || toEmail.trim().isEmpty()) {
+            return false;
+        }
+
+        String subject = "TindahanKo Security Alert - Your Password Has Been Changed";
+        String htmlBody = buildPasswordChangedHtmlTemplate(recipientName, changeMethod);
+
+        // 1. Try Gmail SMTP if configured
+        if (mailSender != null && mailFrom != null && !mailFrom.trim().isEmpty()) {
+            try {
+                MimeMessage mimeMessage = mailSender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+                helper.setFrom(mailFrom, "TindahanKo Security");
+                helper.setTo(toEmail.trim());
+                helper.setSubject(subject);
+                helper.setText(htmlBody, true);
+
+                mailSender.send(mimeMessage);
+                logger.info("[GMAIL SMTP] Password change confirmation successfully delivered to {} via Gmail!", toEmail);
+                logSuccessBanner("GMAIL SMTP (smtp.gmail.com)", toEmail, recipientName, "PASSWORD_CHANGED");
+                return true;
+            } catch (Exception e) {
+                logger.warn("[GMAIL SMTP ERROR] Could not send password changed email via Gmail SMTP: {}", e.getMessage());
+            }
+        }
+
+        // 2. Try Resend API if configured
+        if (resendApiKey != null && !resendApiKey.trim().isEmpty() && !resendApiKey.equalsIgnoreCase("your_resend_api_key")) {
+            try {
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                headers.setBearerAuth(resendApiKey.trim());
+
+                Map<String, Object> payload = new HashMap<>();
+                payload.put("from", "TindahanKo <onboarding@resend.dev>");
+                payload.put("to", Collections.singletonList(toEmail.trim()));
+                payload.put("subject", subject);
+                payload.put("html", htmlBody);
+
+                HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(payload, headers);
+                ResponseEntity<String> response = restTemplate.postForEntity(RESEND_API_URL, requestEntity, String.class);
+
+                logger.info("[RESEND API] Password change confirmation delivered to {}! Response: {}", toEmail, response.getBody());
+                logSuccessBanner("RESEND API (api.resend.com)", toEmail, recipientName, "PASSWORD_CHANGED");
+                return true;
+            } catch (Exception e) {
+                logger.warn("[RESEND API ERROR] Could not send via Resend API: {}", e.getMessage());
+            }
+        }
+
+        System.out.println("\n================================================================================");
+        System.out.println("[TINDANDANKO SECURITY ALERT - PASSWORD CHANGED]");
+        System.out.println("  Recipient Email  : " + toEmail);
+        System.out.println("  Recipient Name   : " + recipientName);
+        System.out.println("  Change Method    : " + changeMethod);
+        System.out.println("  Status           : Security notice dispatched (configure Gmail App Password in .env)");
+        System.out.println("================================================================================\n");
+        return false;
+    }
+
+    private String buildPasswordChangedHtmlTemplate(String name, String changeMethod) {
+        return "<!DOCTYPE html>"
+                + "<html>"
+                + "<head><meta charset='UTF-8'></head>"
+                + "<body style='font-family: Arial, sans-serif; background-color: #f1f5f9; padding: 30px; margin: 0;'>"
+                + "  <div style='max-width: 540px; margin: 0 auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);'>"
+                + "    <div style='background: #163C63; padding: 24px; text-align: center; color: #ffffff;'>"
+                + "      <h1 style='margin: 0; font-size: 22px; font-weight: bold;'>TindahanKo Security</h1>"
+                + "      <p style='margin: 6px 0 0 0; font-size: 13px; opacity: 0.9;'>Security Notification</p>"
+                + "    </div>"
+                + "    <div style='padding: 28px 24px; color: #0f172a;'>"
+                + "      <p style='margin: 0 0 16px 0; font-size: 15px;'>Hello <strong>" + name + "</strong>,</p>"
+                + "      <p style='margin: 0 0 20px 0; font-size: 14px; line-height: 1.6; color: #334155;'>Your TindahanKo account password was successfully updated via <strong>" + changeMethod + "</strong>.</p>"
+                + "      <div style='background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 16px; margin: 20px 0;'>"
+                + "        <p style='margin: 0; color: #166534; font-size: 14px; font-weight: bold;'>✅ Password Updated Successfully</p>"
+                + "        <p style='margin: 6px 0 0 0; color: #15803d; font-size: 13px;'>You can now log in using your new password.</p>"
+                + "      </div>"
+                + "      <p style='margin: 0; font-size: 13px; color: #dc2626;'>🔒 If you did NOT initiate this change, your account may be compromised. Please reset your password immediately or contact your store owner.</p>"
+                + "    </div>"
+                + "    <div style='background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 14px 24px; text-align: center; font-size: 12px; color: #94a3b8;'>"
+                + "      &copy; 2026 TindahanKo - Sari-Sari Store Management System. All rights reserved."
+                + "    </div>"
+                + "  </div>"
+                + "</body>"
+                + "</html>";
+    }
+
     private void logSuccessBanner(String provider, String toEmail, String name, String code) {
         System.out.println("\n================================================================================");
         System.out.println("[TINDANDANKO EMAIL GATEWAY - LIVE EMAIL DISPATCHED]");

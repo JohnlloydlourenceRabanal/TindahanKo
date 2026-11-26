@@ -98,6 +98,45 @@ body {
   color: var(--text-muted);
 }
 
+/* Recovery Method Switcher */
+.recovery-toggle-group {
+  display: flex;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.recovery-toggle-btn {
+  flex: 1;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.recovery-toggle-btn:hover {
+  color: var(--primary);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.recovery-toggle-btn.active {
+  background: #ffffff;
+  color: #163C63;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
 /* Forms */
 .auth-form {
   display: flex;

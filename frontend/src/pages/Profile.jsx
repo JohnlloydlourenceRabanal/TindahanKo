@@ -9,6 +9,7 @@ export function Profile() {
   // Profile Form State
   const [fullName, setFullName] = useState(user?.fullName || '');
   const [mobileNumber, setMobileNumber] = useState(user?.mobileNumber || '');
+  const [email, setEmail] = useState('');
   const [profileData, setProfileData] = useState(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [profileSuccess, setProfileSuccess] = useState('');
@@ -36,6 +37,7 @@ export function Profile() {
         setProfileData(data);
         setFullName(data.fullName || '');
         setMobileNumber(data.mobileNumber || '');
+        setEmail(data.email || '');
       } catch (err) {
         setProfileError(err.message || 'Failed to load profile.');
       } finally {
@@ -68,9 +70,10 @@ export function Profile() {
       const updated = await userApi.updateProfile(token, {
         fullName: cleanName,
         mobileNumber: cleanMobile,
+        email: email.trim(),
       });
       setProfileData(updated);
-      updateUser({ fullName: updated.fullName, mobileNumber: updated.mobileNumber });
+      updateUser({ fullName: updated.fullName, mobileNumber: updated.mobileNumber, email: updated.email });
       setProfileSuccess('Profile information updated successfully.');
     } catch (err) {
       setProfileError(err.message || 'Failed to update profile.');
@@ -251,6 +254,18 @@ export function Profile() {
                     required
                   />
                   <span className="field-hint">Format: 09171234567 or +639171234567 (11 digits)</span>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="email">Email Address (For Gmail notifications & password reset)</label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="yourname@gmail.com"
+                  />
+                  <span className="field-hint">Used for password recovery verification codes and security alerts.</span>
                 </div>
 
                 <div className="profile-actions">
