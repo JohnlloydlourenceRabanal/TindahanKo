@@ -5,14 +5,16 @@ public class ForgotPasswordResponse {
     private String maskedMobile;
     private int expiresInMinutes;
     private boolean success;
+    private boolean liveSmsSent;
 
     public ForgotPasswordResponse() {}
 
-    public ForgotPasswordResponse(String message, String maskedMobile, int expiresInMinutes, boolean success) {
+    public ForgotPasswordResponse(String message, String maskedMobile, int expiresInMinutes, boolean success, boolean liveSmsSent) {
         this.message = message;
         this.maskedMobile = maskedMobile;
         this.expiresInMinutes = expiresInMinutes;
         this.success = success;
+        this.liveSmsSent = liveSmsSent;
     }
 
     public String getMessage() {
@@ -45,5 +47,13 @@ public class ForgotPasswordResponse {
 
     public void setSuccess(boolean success) {
         this.success = success;
+    }
+
+    public boolean isLiveSmsSent() {
+        return liveSmsSent;
+    }
+
+    public void setLiveSmsSent(boolean liveSmsSent) {
+        this.liveSmsSent = liveSmsSent;
     }
 }

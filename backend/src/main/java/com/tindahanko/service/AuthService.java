@@ -29,17 +29,20 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
+    private final SemaphoreService semaphoreService;
 
     public AuthService(UserRepository userRepository,
                        PasswordResetTokenRepository passwordResetTokenRepository,
                        PasswordEncoder passwordEncoder,
                        AuthenticationManager authenticationManager,
-                       JwtUtils jwtUtils) {
+                       JwtUtils jwtUtils,
+                       SemaphoreService semaphoreService) {
         this.userRepository = userRepository;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
+        this.semaphoreService = semaphoreService;
     }
 
     @Transactional
@@ -184,25 +187,20 @@ public class AuthService {
                 ? rawPhone.substring(0, 4) + "****" + rawPhone.substring(rawPhone.length() - 3)
                 : rawPhone;
 
-        // Dispatch simulated SMS to the backend server console log
-        // (Out-of-band delivery prevents unauthorized web users from seeing or intercepting the code)
-        System.out.println("\n================================================================================");
-        System.out.println("[TINDANDANKO SMS GATEWAY - SECURE OUTGOING SMS DISPATCH]");
-        System.out.println("  Recipient Name   : " + user.getFullName());
-        System.out.println("  Username         : " + user.getUsername());
-        System.out.println("  Recipient Mobile : " + user.getMobileNumber());
-        System.out.println("  Verification Code: " + token);
-        System.out.println("  Validity Period  : " + expiryMinutes + " minutes (Single-use only)");
-        System.out.println("  Security Status  : Dispatched to user's mobile device via SMS.");
-        System.out.println("  Note             : NEVER share this verification code with anyone.");
-        System.out.println("================================================================================\n");
+        // Dispatch SMS via Semaphore API (sends real text message if SEMAPHORE_API_KEY is configured in .env)
+        boolean liveSmsSent = semaphoreService.sendVerificationSms(user.getMobileNumber(), user.getFullName(), token, expiryMinutes);
+
+        String successMessage = liveSmsSent
+                ? "Identity verified! A verification code was sent to your phone via Semaphore SMS (" + maskedMobile + "). Please check your text messages."
+                : "Identity verified! A verification code was dispatched via SMS to your registered phone (" + maskedMobile + ").";
 
         // The HTTP response intentionally NEVER leaks the token to the client browser
         return new ForgotPasswordResponse(
-                "Identity verified successfully. A single-use verification code has been dispatched via SMS to your registered mobile number (" + maskedMobile + ").",
+                successMessage,
                 maskedMobile,
                 expiryMinutes,
-                true
+                true,
+                liveSmsSent
         );
     }
 

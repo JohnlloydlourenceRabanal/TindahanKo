@@ -180,7 +180,11 @@ export function ForgotPassword() {
               <div>
                 <strong>Identity Verified!</strong>
                 <div style={{ marginTop: '2px', fontSize: '0.9rem' }}>
-                  A secure verification code has been dispatched via SMS to <strong>{successInfo?.maskedMobile || 'your mobile number'}</strong>.
+                  {successInfo?.liveSmsSent ? (
+                    <>A real SMS verification code was sent via <strong>Semaphore API</strong> to <strong>{successInfo?.maskedMobile}</strong>. Please check your text messages.</>
+                  ) : (
+                    <>A verification code has been dispatched via SMS to <strong>{successInfo?.maskedMobile || 'your mobile number'}</strong>.</>
+                  )}
                 </div>
                 <div style={{ fontSize: '0.8rem', marginTop: '4px', opacity: 0.9 }}>
                   Code is single-use and expires in {successInfo?.expiresInMinutes || 15} minutes.
@@ -241,7 +245,7 @@ export function ForgotPassword() {
             </div>
 
             <div style={{ fontSize: '0.78rem', color: '#475569', background: '#f1f5f9', border: '1px dashed #94a3b8', borderRadius: '6px', padding: '8px 12px', margin: '14px 0' }}>
-              💡 <strong>Academic / Testing Note:</strong> Simulated SMS is securely logged to the Spring Boot backend server terminal console to protect user privacy.
+              📡 <strong>Semaphore SMS Gateway:</strong> Configured for Philippine mobile networks. When <code>SEMAPHORE_API_KEY</code> is set in <code>backend/.env</code>, live SMS is dispatched to your cell phone. Otherwise, outgoing SMS is logged in the Spring Boot server console.
             </div>
 
             <button
