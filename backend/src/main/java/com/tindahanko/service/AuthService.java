@@ -148,19 +148,24 @@ public class AuthService {
 
     @Transactional
     public ForgotPasswordResponse requestPasswordReset(ForgotPasswordRequest request) {
-        String input = request.getUsernameOrMobile().trim();
+        String username = request.getUsername().trim();
+        String mobileNumber = request.getMobileNumber().trim().replaceAll("[\\s\\-\\(\\)]", "");
+        String fullName = request.getFullName().trim();
 
-        // Find user by either registered username or Philippine mobile number
-        Optional<User> userOpt = userRepository.findByUsername(input);
-        if (userOpt.isEmpty()) {
-            userOpt = userRepository.findByMobileNumber(input);
+        // Strict multi-factor identity verification: username, mobile number, and full name must all match
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Identity verification failed: The provided username, mobile number, and full name do not match our records."));
+
+        // Verify registered mobile number
+        String userMobile = user.getMobileNumber().replaceAll("[\\s\\-\\(\\)]", "");
+        if (!userMobile.equals(mobileNumber)) {
+            throw new IllegalArgumentException("Identity verification failed: The provided username, mobile number, and full name do not match our records.");
         }
 
-        if (userOpt.isEmpty()) {
-            throw new IllegalArgumentException("No registered account found matching '" + input + "'.");
+        // Verify registered full name (case-insensitive)
+        if (!user.getFullName().trim().equalsIgnoreCase(fullName)) {
+            throw new IllegalArgumentException("Identity verification failed: The provided username, mobile number, and full name do not match our records.");
         }
-
-        User user = userOpt.get();
 
         // Invalidate any existing unused reset tokens for this user
         passwordResetTokenRepository.deleteByUser(user);
@@ -173,10 +178,31 @@ public class AuthService {
         PasswordResetToken resetToken = new PasswordResetToken(user, token, expiry);
         passwordResetTokenRepository.save(resetToken);
 
+        // Mask phone number for user privacy and security (e.g., 0917****888)
+        String rawPhone = user.getMobileNumber();
+        String maskedMobile = rawPhone.length() >= 7
+                ? rawPhone.substring(0, 4) + "****" + rawPhone.substring(rawPhone.length() - 3)
+                : rawPhone;
+
+        // Dispatch simulated SMS to the backend server console log
+        // (Out-of-band delivery prevents unauthorized web users from seeing or intercepting the code)
+        System.out.println("\n================================================================================");
+        System.out.println("[TINDANDANKO SMS GATEWAY - SECURE OUTGOING SMS DISPATCH]");
+        System.out.println("  Recipient Name   : " + user.getFullName());
+        System.out.println("  Username         : " + user.getUsername());
+        System.out.println("  Recipient Mobile : " + user.getMobileNumber());
+        System.out.println("  Verification Code: " + token);
+        System.out.println("  Validity Period  : " + expiryMinutes + " minutes (Single-use only)");
+        System.out.println("  Security Status  : Dispatched to user's mobile device via SMS.");
+        System.out.println("  Note             : NEVER share this verification code with anyone.");
+        System.out.println("================================================================================\n");
+
+        // The HTTP response intentionally NEVER leaks the token to the client browser
         return new ForgotPasswordResponse(
-                "Password reset verification code generated for " + user.getUsername() + ". Please enter the code to set your new password.",
-                token,
-                expiryMinutes
+                "Identity verified successfully. A single-use verification code has been dispatched via SMS to your registered mobile number (" + maskedMobile + ").",
+                maskedMobile,
+                expiryMinutes,
+                true
         );
     }
 

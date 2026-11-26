@@ -22,6 +22,9 @@ Thumbs.db
 backend/target/
 backend/.mvn/wrapper/maven-wrapper.jar
 backend/logs/
+backend/data/
+*.mv.db
+*.trace.db
 *.log
 
 # Frontend / Node

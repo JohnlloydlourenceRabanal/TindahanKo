@@ -5,11 +5,15 @@ import { authApi } from '../api/auth';
 export function ForgotPassword() {
   const navigate = useNavigate();
 
-  // Step 1: Request Token | Step 2: Reset Password | Step 3: Success
+  // Step 1: Identity Verification | Step 2: Enter Code & Reset Password | Step 3: Success
   const [step, setStep] = useState(1);
 
-  // Form Fields
-  const [usernameOrMobile, setUsernameOrMobile] = useState('');
+  // Identity Verification Form Fields
+  const [username, setUsername] = useState('');
+  const [mobileNumber, setMobileNumber] = useState('');
+  const [fullName, setFullName] = useState('');
+
+  // Password Reset Form Fields
   const [token, setToken] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -24,19 +28,30 @@ export function ForgotPassword() {
     e.preventDefault();
     setError('');
 
-    if (!usernameOrMobile.trim()) {
-      setError('Please enter your registered username or Philippine mobile number.');
+    if (!username.trim() || !mobileNumber.trim() || !fullName.trim()) {
+      setError('Please provide your Username, Registered Mobile Number, and Full Name for identity verification.');
+      return;
+    }
+
+    const cleanMobile = mobileNumber.trim().replace(/[\s\-()]/g, '');
+    const mobileRegex = /^(09|\+639)\d{9}$/;
+    if (!mobileRegex.test(cleanMobile)) {
+      setError('Mobile number must be a valid Philippine mobile number (e.g., 09171234567 or +639171234567).');
       return;
     }
 
     setLoading(true);
     try {
-      const res = await authApi.forgotPassword(usernameOrMobile.trim());
+      const res = await authApi.forgotPassword({
+        username: username.trim(),
+        mobileNumber: cleanMobile,
+        fullName: fullName.trim(),
+      });
       setSuccessInfo(res);
-      setToken(res.resetToken || '');
+      setToken(''); // Never prefill token; must be provided from received SMS/console
       setStep(2);
     } catch (err) {
-      setError(err.message || 'Failed to request password reset code.');
+      setError(err.message || 'Identity verification failed. Please verify your account details.');
     } finally {
       setLoading(false);
     }
@@ -47,7 +62,7 @@ export function ForgotPassword() {
     setError('');
 
     if (!token.trim()) {
-      setError('Please provide the reset verification code.');
+      setError('Please enter the verification code sent to your registered mobile number.');
       return;
     }
 
@@ -64,13 +79,13 @@ export function ForgotPassword() {
     setLoading(true);
     try {
       await authApi.resetPassword({
-        token: token.trim(),
+        token: token.trim().toUpperCase(),
         newPassword,
         confirmPassword,
       });
       setStep(3);
     } catch (err) {
-      setError(err.message || 'Failed to reset password.');
+      setError(err.message || 'Failed to reset password. Please check your verification code.');
     } finally {
       setLoading(false);
     }
@@ -88,8 +103,8 @@ export function ForgotPassword() {
           />
           <h2>{step === 3 ? 'Password Reset Complete' : 'Reset Your Password'}</h2>
           <p className="auth-subtitle">
-            {step === 1 && 'Enter your username or mobile number to receive a secure recovery code'}
-            {step === 2 && 'Enter the verification code and choose your new secure password'}
+            {step === 1 && 'Verify your account credentials to receive a secure recovery code via SMS'}
+            {step === 2 && 'Enter the verification code dispatched to your phone to set a new password'}
             {step === 3 && 'Your account credentials have been securely updated with BCrypt hashing'}
           </p>
         </div>
@@ -101,25 +116,51 @@ export function ForgotPassword() {
           </div>
         )}
 
-        {/* STEP 1: Request Code */}
+        {/* STEP 1: Secure Multi-Factor Identity Verification */}
         {step === 1 && (
           <form onSubmit={handleRequestToken} className="auth-form">
             <div className="form-group">
-              <label htmlFor="usernameOrMobile">Username or Registered Mobile Number</label>
+              <label htmlFor="username">Account Username *</label>
               <input
-                id="usernameOrMobile"
+                id="username"
                 type="text"
-                value={usernameOrMobile}
-                onChange={(e) => setUsernameOrMobile(e.target.value)}
-                placeholder="e.g. admin or 09171234567"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="e.g. admin or customer_ana"
                 required
                 autoFocus
               />
-              <span className="field-hint">Works with your TindahanKo username or Philippine phone number.</span>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="mobileNumber">Registered Philippine Mobile Number *</label>
+              <input
+                id="mobileNumber"
+                type="tel"
+                value={mobileNumber}
+                onChange={(e) => setMobileNumber(e.target.value)}
+                placeholder="09171234567 or +639171234567"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="fullName">Registered Full Name *</label>
+              <input
+                id="fullName"
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="e.g. John Lloyd Lourence Rabanal"
+                required
+              />
+              <span className="field-hint">
+                Multi-factor identity verification ensures only legitimate account owners can request password recovery.
+              </span>
             </div>
 
             <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
-              {loading ? 'Verifying Account...' : 'Generate Reset Code'}
+              {loading ? 'Verifying Identity...' : 'Verify Identity & Send Code'}
             </button>
 
             <div className="auth-footer">
@@ -131,16 +172,21 @@ export function ForgotPassword() {
           </form>
         )}
 
-        {/* STEP 2: Enter Token & Set Password */}
+        {/* STEP 2: Enter Token & Set New Password */}
         {step === 2 && (
           <form onSubmit={handleResetPassword} className="auth-form">
-            {successInfo?.resetToken && (
-              <div className="token-banner">
-                <span className="token-label">Verification Code Issued:</span>
-                <span className="token-code">{successInfo.resetToken}</span>
-                <span className="token-expiry">Valid for {successInfo.expiresInMinutes || 15} minutes • Single-use</span>
+            <div className="alert alert-success" style={{ marginBottom: '20px', alignItems: 'flex-start' }}>
+              <span className="alert-icon">📱</span>
+              <div>
+                <strong>Identity Verified!</strong>
+                <div style={{ marginTop: '2px', fontSize: '0.9rem' }}>
+                  A secure verification code has been dispatched via SMS to <strong>{successInfo?.maskedMobile || 'your mobile number'}</strong>.
+                </div>
+                <div style={{ fontSize: '0.8rem', marginTop: '4px', opacity: 0.9 }}>
+                  Code is single-use and expires in {successInfo?.expiresInMinutes || 15} minutes.
+                </div>
               </div>
-            )}
+            </div>
 
             <div className="form-group">
               <label htmlFor="token">Verification Code *</label>
@@ -149,9 +195,11 @@ export function ForgotPassword() {
                 type="text"
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
-                placeholder="e.g. TK-XXXXXXXX"
+                placeholder="Enter 8-character code (e.g. TK-XXXXXXXX)"
                 required
+                autoFocus
               />
+              <span className="field-hint">Enter the code received on your registered mobile device.</span>
             </div>
 
             <div className="form-group">
@@ -192,6 +240,10 @@ export function ForgotPassword() {
               )}
             </div>
 
+            <div style={{ fontSize: '0.78rem', color: '#475569', background: '#f1f5f9', border: '1px dashed #94a3b8', borderRadius: '6px', padding: '8px 12px', margin: '14px 0' }}>
+              💡 <strong>Academic / Testing Note:</strong> Simulated SMS is securely logged to the Spring Boot backend server terminal console to protect user privacy.
+            </div>
+
             <button
               type="submit"
               className="btn btn-primary btn-block"
@@ -204,9 +256,9 @@ export function ForgotPassword() {
               <button
                 type="button"
                 className="btn-link"
-                onClick={() => { setStep(1); setError(''); }}
+                onClick={() => { setStep(1); setError(''); setToken(''); }}
               >
-                ← Request a different code
+                ← Back to Identity Verification
               </button>
             </div>
           </form>

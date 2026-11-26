@@ -64,11 +64,11 @@ export const authApi = {
     return handleResponse(response);
   },
 
-  async forgotPassword(usernameOrMobile) {
+  async forgotPassword(verificationData) {
     const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ usernameOrMobile }),
+      body: JSON.stringify(verificationData),
     });
     return handleResponse(response);
   },
