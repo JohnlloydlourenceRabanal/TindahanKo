@@ -1,9 +1,6 @@
 package com.tindahanko.controller;
 
-import com.tindahanko.dto.AuthResponse;
-import com.tindahanko.dto.LoginRequest;
-import com.tindahanko.dto.RegisterRequest;
-import com.tindahanko.dto.UserDTO;
+import com.tindahanko.dto.*;
 import com.tindahanko.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -31,6 +28,18 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ForgotPasswordResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        ForgotPasswordResponse response = authService.requestPasswordReset(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<MessageResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok(MessageResponse.ok("Password has been reset successfully. Please log in with your new password."));
     }
 
     @GetMapping("/me")

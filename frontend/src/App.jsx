@@ -4,9 +4,10 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
+import { ForgotPassword } from './pages/ForgotPassword';
+import { Profile } from './pages/Profile';
 import { OwnerDashboard } from './pages/OwnerDashboard';
 import { CustomerDashboard } from './pages/CustomerDashboard';
-import { Unauthorized } from './pages/Unauthorized';
 import './styles/index.css';
 
 function RootRedirect() {
@@ -39,7 +40,18 @@ export function App() {
           <Route path="/" element={<RootRedirect />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+
+          {/* Protected Profile & Password Management (Both Roles) */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute allowedRoles={['STORE_OWNER', 'CUSTOMER']}>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Protected Store Owner Dashboard */}
           <Route
             path="/owner/dashboard"

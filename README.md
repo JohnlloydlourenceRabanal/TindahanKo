@@ -7,13 +7,26 @@
 > **A Web-Based Inventory and Customer Credit Management System with SMS Reminders and Digital Payment Integration for Neighborhood Sari-Sari Stores**  
 > *Course:* IT342 - Systems Integration and Architecture 1  
 > *Author:* John Lloyd Lourence C. Rabanal  
-> *Submission:* Project Development Increment 1 (User Accounts & Authentication Module)  
-> *Branch:* `main` (All features, documentation, and assets consolidated)
+> *Submission:* Project Development Increment 2 (User Profile & Password Management Module)  
+> *Branch:* `main` (Increment 1 & 2 features, documentation, and completion report consolidated)
+
+---
+
+## Increment 2 Deliverables & Verification Checklist
+All core functional and architectural requirements for **Increment 2** are fully operational, tested, and integrated on the `main` branch:
+
+| Requirement / Deliverable | Status | Implementation Details |
+|---|---|---|
+| **1. User Profile Management** | ✅ Complete | Authenticated users can view and edit their own profile (`fullName`, `mobileNumber`). Inputs validated with Philippine phone regex (`^(09\|\+639)\d{9}$`). Strict uniqueness check prevents mobile number duplicates across users. |
+| **2. Reset Password (Forgot Password)** | ✅ Complete | Self-service password recovery available via login page. Issues a secure, single-use, 15-minute expiring verification token. Hashes new password with BCrypt (work factor 10) and permanently invalidates used tokens. |
+| **3. Change Password** | ✅ Complete | Authenticated users can update their password. Enforces mandatory current password verification, minimum 8 characters, confirmation matching, and prevents reusing the current password. |
+| **4. Database Schema Extension** | ✅ Complete | Created `password_reset_tokens` table in PostgreSQL with foreign key cascade to `users`, indexed token, and expiry management. |
+| **5. Increment 2 Completion Report** | ✅ Complete | Formal 4-page report generated and committed at [`docs/Increment-2-Completion-Report.pdf`](docs/Increment-2-Completion-Report.pdf). |
 
 ---
 
 ## Increment 1 Deliverables & Verification Checklist
-All core functional and architectural requirements for **Increment 1** are fully operational, tested, and integrated on the `main` branch:
+All core functional and architectural requirements for **Increment 1** remain fully operational:
 
 | Requirement / Deliverable | Status | Implementation Details |
 |---|---|---|

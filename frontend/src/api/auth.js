@@ -63,4 +63,22 @@ export const authApi = {
     });
     return handleResponse(response);
   },
+
+  async forgotPassword(usernameOrMobile) {
+    const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ usernameOrMobile }),
+    });
+    return handleResponse(response);
+  },
+
+  async resetPassword({ token, newPassword, confirmPassword }) {
+    const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, newPassword, confirmPassword }),
+    });
+    return handleResponse(response);
+  },
 };

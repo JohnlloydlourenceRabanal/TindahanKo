@@ -1,11 +1,10 @@
 package com.tindahanko.service;
 
-import com.tindahanko.dto.AuthResponse;
-import com.tindahanko.dto.LoginRequest;
-import com.tindahanko.dto.RegisterRequest;
-import com.tindahanko.dto.UserDTO;
+import com.tindahanko.dto.*;
+import com.tindahanko.entity.PasswordResetToken;
 import com.tindahanko.entity.Role;
 import com.tindahanko.entity.User;
+import com.tindahanko.repository.PasswordResetTokenRepository;
 import com.tindahanko.repository.UserRepository;
 import com.tindahanko.security.JwtUtils;
 import com.tindahanko.security.UserPrincipal;
@@ -18,19 +17,26 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.UUID;
+
 @Service
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
 
     public AuthService(UserRepository userRepository,
+                       PasswordResetTokenRepository passwordResetTokenRepository,
                        PasswordEncoder passwordEncoder,
                        AuthenticationManager authenticationManager,
                        JwtUtils jwtUtils) {
         this.userRepository = userRepository;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
@@ -138,5 +144,80 @@ public class AuthService {
                 user.getMobileNumber(),
                 user.getRole().name()
         );
+    }
+
+    @Transactional
+    public ForgotPasswordResponse requestPasswordReset(ForgotPasswordRequest request) {
+        String input = request.getUsernameOrMobile().trim();
+
+        // Find user by either registered username or Philippine mobile number
+        Optional<User> userOpt = userRepository.findByUsername(input);
+        if (userOpt.isEmpty()) {
+            userOpt = userRepository.findByMobileNumber(input);
+        }
+
+        if (userOpt.isEmpty()) {
+            throw new IllegalArgumentException("No registered account found matching '" + input + "'.");
+        }
+
+        User user = userOpt.get();
+
+        // Invalidate any existing unused reset tokens for this user
+        passwordResetTokenRepository.deleteByUser(user);
+
+        // Generate a secure, single-use 8-character verification token
+        String token = "TK-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        int expiryMinutes = 15;
+        LocalDateTime expiry = LocalDateTime.now().plusMinutes(expiryMinutes);
+
+        PasswordResetToken resetToken = new PasswordResetToken(user, token, expiry);
+        passwordResetTokenRepository.save(resetToken);
+
+        return new ForgotPasswordResponse(
+                "Password reset verification code generated for " + user.getUsername() + ". Please enter the code to set your new password.",
+                token,
+                expiryMinutes
+        );
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        String rawToken = request.getToken().trim();
+
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(rawToken)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid or unrecognized password reset token."));
+
+        if (resetToken.isUsed()) {
+            throw new IllegalArgumentException("This password reset token has already been used.");
+        }
+
+        if (resetToken.isExpired()) {
+            throw new IllegalArgumentException("This password reset token has expired. Please request a new verification code.");
+        }
+
+        // Validate password confirmation match
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new IllegalArgumentException("New password and confirmation do not match.");
+        }
+
+        // Validate minimum length
+        if (request.getNewPassword().length() < 8) {
+            throw new IllegalArgumentException("New password must be at least 8 characters long.");
+        }
+
+        User user = resetToken.getUser();
+
+        // Ensure new password differs from current password
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPasswordHash())) {
+            throw new IllegalArgumentException("New password cannot be the same as your current password.");
+        }
+
+        // Hash new password with BCrypt (strength 10)
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        // Mark token as consumed (single-use enforcement)
+        resetToken.setUsed(true);
+        passwordResetTokenRepository.save(resetToken);
     }
 }
