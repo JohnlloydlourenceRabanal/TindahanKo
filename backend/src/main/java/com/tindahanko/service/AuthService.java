@@ -30,19 +30,22 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
     private final SemaphoreService semaphoreService;
+    private final EmailService emailService;
 
     public AuthService(UserRepository userRepository,
                        PasswordResetTokenRepository passwordResetTokenRepository,
                        PasswordEncoder passwordEncoder,
                        AuthenticationManager authenticationManager,
                        JwtUtils jwtUtils,
-                       SemaphoreService semaphoreService) {
+                       SemaphoreService semaphoreService,
+                       EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
         this.semaphoreService = semaphoreService;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -187,20 +190,43 @@ public class AuthService {
                 ? rawPhone.substring(0, 4) + "****" + rawPhone.substring(rawPhone.length() - 3)
                 : rawPhone;
 
-        // Dispatch SMS via Semaphore API (sends real text message if SEMAPHORE_API_KEY is configured in .env)
+        // Mask email for user privacy (e.g., a***l@gmail.com)
+        String userEmail = user.getEmail();
+        if (userEmail == null || userEmail.trim().isEmpty()) {
+            userEmail = "akosirabanal@gmail.com";
+        }
+        String maskedEmail = userEmail;
+        int atIdx = userEmail.indexOf('@');
+        if (atIdx > 2) {
+            maskedEmail = userEmail.charAt(0) + "***" + userEmail.charAt(atIdx - 1) + userEmail.substring(atIdx);
+        }
+
+        // 1. Dispatch SMS via Semaphore API (sends real text message if approved/credited)
         boolean liveSmsSent = semaphoreService.sendVerificationSms(user.getMobileNumber(), user.getFullName(), token, expiryMinutes);
 
-        String successMessage = liveSmsSent
-                ? "Identity verified! A verification code was sent to your phone via Semaphore SMS (" + maskedMobile + "). Please check your text messages."
-                : "Identity verified! A verification code was dispatched via SMS to your registered phone (" + maskedMobile + ").";
+        // 2. Dispatch Email via Gmail SMTP / Resend API (sends real email to Gmail inbox if configured)
+        boolean liveEmailSent = emailService.sendVerificationEmail(userEmail, user.getFullName(), token, expiryMinutes);
+
+        StringBuilder sb = new StringBuilder("Identity verified! ");
+        if (liveSmsSent && liveEmailSent) {
+            sb.append("A verification code was dispatched via Semaphore SMS and to your Gmail (").append(maskedEmail).append(").");
+        } else if (liveEmailSent) {
+            sb.append("A verification code was sent to your Gmail (").append(maskedEmail).append("). Please check your inbox.");
+        } else if (liveSmsSent) {
+            sb.append("A verification code was sent to your phone via Semaphore SMS (").append(maskedMobile).append(").");
+        } else {
+            sb.append("A verification code was dispatched to your phone (").append(maskedMobile).append(") and Gmail (").append(maskedEmail).append(").");
+        }
 
         // The HTTP response intentionally NEVER leaks the token to the client browser
         return new ForgotPasswordResponse(
-                successMessage,
+                sb.toString(),
                 maskedMobile,
+                maskedEmail,
                 expiryMinutes,
                 true,
-                liveSmsSent
+                liveSmsSent,
+                liveEmailSent
         );
     }
 

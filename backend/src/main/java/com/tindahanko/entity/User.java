@@ -24,6 +24,9 @@ public class User {
     @Column(name = "mobile_number", nullable = false, length = 15)
     private String mobileNumber;
 
+    @Column(name = "email", length = 100)
+    private String email;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 20)
     private Role role;
@@ -34,10 +37,15 @@ public class User {
     public User() {}
 
     public User(String username, String passwordHash, String fullName, String mobileNumber, Role role) {
+        this(username, passwordHash, fullName, mobileNumber, null, role);
+    }
+
+    public User(String username, String passwordHash, String fullName, String mobileNumber, String email, Role role) {
         this.username = username;
         this.passwordHash = passwordHash;
         this.fullName = fullName;
         this.mobileNumber = mobileNumber;
+        this.email = email;
         this.role = role;
         this.createdAt = LocalDateTime.now();
     }
@@ -80,6 +88,14 @@ public class User {
 
     public void setMobileNumber(String mobileNumber) {
         this.mobileNumber = mobileNumber;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public Role getRole() {

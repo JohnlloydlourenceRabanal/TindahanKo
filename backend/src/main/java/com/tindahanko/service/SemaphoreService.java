@@ -77,7 +77,8 @@ public class SemaphoreService {
                 formData.add("apikey", apiKey.trim());
                 formData.add("number", cleanNumber);
                 formData.add("message", smsText);
-                if (senderName != null && !senderName.trim().isEmpty()) {
+                // Only add custom sendername if explicitly set and not the default
+                if (senderName != null && !senderName.trim().isEmpty() && !senderName.trim().equalsIgnoreCase("SEMAPHORE")) {
                     formData.add("sendername", senderName.trim());
                 }
 

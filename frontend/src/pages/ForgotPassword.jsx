@@ -176,17 +176,26 @@ export function ForgotPassword() {
         {step === 2 && (
           <form onSubmit={handleResetPassword} className="auth-form">
             <div className="alert alert-success" style={{ marginBottom: '20px', alignItems: 'flex-start' }}>
-              <span className="alert-icon">📱</span>
+              <span className="alert-icon">🔔</span>
               <div>
                 <strong>Identity Verified!</strong>
                 <div style={{ marginTop: '2px', fontSize: '0.9rem' }}>
+                  {successInfo?.liveEmailSent && (
+                    <div style={{ color: '#047857', fontWeight: '500' }}>
+                      ✉️ Verification email sent to your Gmail (<strong>{successInfo.maskedEmail}</strong>). Please check your inbox or spam!
+                    </div>
+                  )}
                   {successInfo?.liveSmsSent ? (
-                    <>A real SMS verification code was sent via <strong>Semaphore API</strong> to <strong>{successInfo?.maskedMobile}</strong>. Please check your text messages.</>
+                    <div style={{ marginTop: '3px' }}>
+                      📱 Real SMS dispatched via <strong>Semaphore API</strong> to <strong>{successInfo?.maskedMobile}</strong>.
+                    </div>
                   ) : (
-                    <>A verification code has been dispatched via SMS to <strong>{successInfo?.maskedMobile || 'your mobile number'}</strong>.</>
+                    <div style={{ marginTop: '3px' }}>
+                      📱 Dispatched to phone <strong>{successInfo?.maskedMobile}</strong> and Gmail <strong>{successInfo?.maskedEmail}</strong>.
+                    </div>
                   )}
                 </div>
-                <div style={{ fontSize: '0.8rem', marginTop: '4px', opacity: 0.9 }}>
+                <div style={{ fontSize: '0.8rem', marginTop: '6px', opacity: 0.9 }}>
                   Code is single-use and expires in {successInfo?.expiresInMinutes || 15} minutes.
                 </div>
               </div>
@@ -245,7 +254,7 @@ export function ForgotPassword() {
             </div>
 
             <div style={{ fontSize: '0.78rem', color: '#475569', background: '#f1f5f9', border: '1px dashed #94a3b8', borderRadius: '6px', padding: '8px 12px', margin: '14px 0' }}>
-              📡 <strong>Semaphore SMS Gateway:</strong> Configured for Philippine mobile networks. When <code>SEMAPHORE_API_KEY</code> is set in <code>backend/.env</code>, live SMS is dispatched to your cell phone. Otherwise, outgoing SMS is logged in the Spring Boot server console.
+              🔔 <strong>Dual Recovery Channels (SMS &amp; Gmail):</strong> Outgoing verification is dispatched via Semaphore SMS and Gmail/Resend. For local evaluation without carrier top-ups, the verification code is logged securely in your Spring Boot server console.
             </div>
 
             <button
